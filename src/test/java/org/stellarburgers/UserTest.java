@@ -62,6 +62,8 @@ public class UserTest {
 
     @After
     public void tearDown() {
-        additionalData.deleteUser(user);
+        if (user != null) {
+            additionalData.deleteUser(user);
+        }
     }
 }

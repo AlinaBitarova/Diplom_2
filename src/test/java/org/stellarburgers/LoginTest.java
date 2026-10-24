@@ -6,8 +6,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
-
 import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.CoreMatchers.*;
 
@@ -35,11 +33,9 @@ public class LoginTest {
     @Test
     @Description("Check status code of invalid log in with incorrect email")
     public void testUserCantLogInWithInvalidEmail() {
-        Map<String, String> incorrectCredentials = Map.of(
-                "email", "incorrect_email123@qa.com",
-                "password", user.getPassword()
+        User userWithIncorrectCredentials = new User("incorrectemail@qa.com", user.getPassword()
         );
-        Response response = additionalData.loginUser(incorrectCredentials);
+        Response response = additionalData.loginUser(userWithIncorrectCredentials);
         response.then()
                 .statusCode(SC_UNAUTHORIZED)
                 .body("message", containsString(AdditionalData.UNAUTHORIZED_ERROR));
@@ -48,11 +44,9 @@ public class LoginTest {
     @Test
     @Description("Check status code of invalid log in with incorrect password")
     public void testUserCantLogInWithInvalidPassword() {
-        Map<String, String> incorrectCredentials = Map.of(
-                "email", user.getEmail(),
-                "password", "wrong_password1"
+        User userWithIncorrectCredentials = new User(user.getEmail(),"wrong_password1"
         );
-        Response response = additionalData.loginUser(incorrectCredentials);
+        Response response = additionalData.loginUser(userWithIncorrectCredentials);
         response.then()
                 .statusCode(SC_UNAUTHORIZED)
                 .body("message", containsString(AdditionalData.UNAUTHORIZED_ERROR));
@@ -61,10 +55,9 @@ public class LoginTest {
     @Test
     @Description("Check status code of invalid log in without email")
     public void testUserCantLogInWithoutEmail() {
-        Map<String, String> credentials = Map.of(
-                "password", user.getPassword()
+        User userWithoutLogin = new User(null, user.getPassword()
         );
-        Response response = additionalData.loginUser(credentials);
+        Response response = additionalData.loginUser(userWithoutLogin);
         response.then()
                 .statusCode(SC_UNAUTHORIZED)
                 .body("message", containsString(AdditionalData.UNAUTHORIZED_ERROR));
@@ -73,10 +66,9 @@ public class LoginTest {
     @Test
     @Description("Check status code of invalid log in without password")
     public void testUserCantLogInWithoutPassword() {
-        Map<String, String> credentials = Map.of(
-                "email", user.getEmail()
+        User userWithoutPassword = new User(user.getEmail(), null
         );
-        Response response = additionalData.loginUser(credentials);
+        Response response = additionalData.loginUser(userWithoutPassword);
         response.then()
                 .statusCode(SC_UNAUTHORIZED)
                 .body("message", containsString(AdditionalData.UNAUTHORIZED_ERROR));
@@ -85,11 +77,9 @@ public class LoginTest {
     @Test
     @Description("Check status code of invalid log in with unregistered credentials")
     public void testLoggingInAsUnregisteredUserReturnsError() {
-        Map<String, String> unregisteredCredentials = Map.of(
-                "email", "unregistered_email@qa.com",
-                "password", "unregistered_password"
+        User userWithUnregisteredCredentials = new User("unregistered_email@qa.com", "unregistered_password"
         );
-        Response response = additionalData.loginUser(unregisteredCredentials);
+        Response response = additionalData.loginUser(userWithUnregisteredCredentials);
         response.then()
                 .statusCode(SC_UNAUTHORIZED)
                 .body("message", containsString(AdditionalData.UNAUTHORIZED_ERROR));
@@ -97,6 +87,8 @@ public class LoginTest {
 
     @After
     public void tearDown() {
-        additionalData.deleteUser(user);
+        if (user != null) {
+            additionalData.deleteUser(user);
+        }
     }
 }

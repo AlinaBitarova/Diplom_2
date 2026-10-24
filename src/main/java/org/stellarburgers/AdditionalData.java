@@ -7,10 +7,10 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import net.datafaker.Faker;
 
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.anyOf;
 
 public class AdditionalData {
 
@@ -45,19 +45,11 @@ public class AdditionalData {
     }
 
     @Step("Sending POST request to login")
-    public Response loginUser(Object credentials) {
+    public Response loginUser(User user) {
         return given()
                 .spec(getRequestSpec())
-                .body(credentials)
+                .body(user)
                 .post(USER_LOGIN_PATH);
-    }
-
-    @Step("Sending POST request to login with User")
-    public Response loginUser(User user) {
-        return loginUser(Map.of(
-                "email", user.getEmail(),
-                "password", user.getPassword()
-        ));
     }
 
     @Step("Sending POST request to create an order without logging in")
@@ -104,7 +96,7 @@ public class AdditionalData {
 
         Response loginResponse = loginUser(user);
 
-        if (loginResponse.getStatusCode() == SC_ACCEPTED) {
+        if (loginResponse.getStatusCode() == SC_OK || loginResponse.getStatusCode() == SC_ACCEPTED) {
             String accessToken = loginResponse.path("accessToken");
 
             if (accessToken != null) {
@@ -114,7 +106,7 @@ public class AdditionalData {
                         .when()
                         .delete(USER_PATH)
                         .then()
-                        .statusCode(SC_OK);
+                        .statusCode(anyOf(equalTo(SC_OK), equalTo(SC_ACCEPTED)));
             }
         }
     }

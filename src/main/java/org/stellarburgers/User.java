@@ -1,5 +1,8 @@
 package org.stellarburgers;
 
+import io.qameta.allure.internal.shadowed.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
 
     private String email;
@@ -13,6 +16,11 @@ public class User {
     }
 
     public User() {
+    }
+
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
     }
 
     public String getEmail() {

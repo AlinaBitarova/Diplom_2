@@ -7,12 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.apache.http.HttpStatus.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.*;
 
 public class OrderTest {
 
@@ -33,7 +31,7 @@ public class OrderTest {
         additionalData.createUser(user);
         Response loginResponse = additionalData.loginUser(user);
         String accessToken = loginResponse.path("accessToken");
-        Map<String, List<String>> order = Map.of("ingredients", ingredients);
+        Order order = new Order(ingredients);
         Response response = additionalData.createOrderWithLoggingIn(order, accessToken);
         response.then()
                 .statusCode(SC_OK)
@@ -43,7 +41,7 @@ public class OrderTest {
     @Test
     @Description("Check status code of ordering without logging in")
     public void testShouldCreateOrderWithoutLoggingIn() {
-        Map<String, List<String>> order = Map.of("ingredients", ingredients);
+        Order order = new Order(ingredients);
         Response response = additionalData.createOrderWithoutLoggingIn(order);
         response.then()
                 .statusCode(SC_OK)
@@ -53,7 +51,7 @@ public class OrderTest {
     @Test
     @Description("Check status code of ordering without ingredients")
     public void testCantCreateOrderWithoutIngredients() {
-        Map<String, List<String>> emptyOrder = Map.of("ingredients", List.of());
+        Order emptyOrder = new Order(List.of());
         Response response = additionalData.createOrderWithoutLoggingIn(emptyOrder);
         response.then()
                 .statusCode(SC_BAD_REQUEST)
@@ -64,7 +62,7 @@ public class OrderTest {
     @Description("Check status code of ordering non-existing ingredients")
     public void testCantCreateOrderWithInvalidIngredients() {
         List<String> invalidIngredients = List.of("invalid_ingredient1", "invalid_ingredient2");
-        Map<String, List<String>> invalidOrder = Map.of("ingredients", invalidIngredients);
+        Order invalidOrder = new Order(invalidIngredients);
         Response response = additionalData.createOrderWithoutLoggingIn(invalidOrder);
         response.then()
                 .statusCode(SC_INTERNAL_SERVER_ERROR);
@@ -72,6 +70,8 @@ public class OrderTest {
 
     @After
     public void tearDown() {
-        additionalData.deleteUser(user);
+        if (user != null) {
+            additionalData.deleteUser(user);
+        }
     }
 }
